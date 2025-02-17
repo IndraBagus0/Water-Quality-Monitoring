@@ -360,7 +360,7 @@ var barOptions = {
 }
 
 var radialGradientOptions = {
-  series: [75],
+  series: [96],
   chart: {
     height: 350,
     type: "radialBar",
