@@ -1,9 +1,11 @@
 from pymongo import MongoClient
+from configs import Config
+from flask import request
 
-# Koneksi ke MongoDB
-client = MongoClient("mongodb+srv://indra:nnBigGhtZnZizObM@hostdb.vbod5.mongodb.net/?retryWrites=true&w=majority&appName=HostDB")
-db = client["water_quality"]
+client = MongoClient(Config.MONGO_URI)
+db = client.get_default_database()
 database_sensor = db["testing_sensor"]
+database_users = db["users"]
 
 def get_data():
     """Mengambil dan memproses data terbaru dari collection 'testing_sensor' di MongoDB."""
@@ -21,4 +23,4 @@ def get_data():
             "water_quality": record['water_quality']
         })
 
-    return monitoring_data
+    return monitoring_data  

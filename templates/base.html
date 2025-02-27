@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %} <!-- Include head -->
+
+<body>
+    <div id="app">
+        {% include 'sidebar.html' %}  <!-- Include Sidebar -->
+        
+        <main id="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+
+    <script src="{{ url_for('static', filename='assets/compiled/js/app.js') }}"></script>
+
+
+    <!-- ApexCharts -->
+    <script src="{{ url_for('static', filename='assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/static/js/pages/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/static/js/dashboard.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='assets/static/js/pages/ui-apexchart.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='assets/static/js/components/dark.js') }}"></script>
+    <script
+        src="{{ url_for('static', filename='assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/static/js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/extensions/jquery/jquery.min.js') }}"></script>
+    <script
+        src="{{ url_for('static', filename='assets/extensions/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script
+        src="{{ url_for('static', filename='assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/static/js/pages/datatables.js') }}"></script>
+
+</body>
+
+</html>
