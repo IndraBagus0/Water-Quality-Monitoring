@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -8,7 +8,6 @@ from configs import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
-# Initialize extensions
 mongo = PyMongo(app)
 
 @app.route('/')
@@ -23,19 +22,38 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
+@app.route('/data', methods=['POST'])
+def receive_data():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"status": "error", "message": "No JSON received"}), 400
+
+        required_keys = ["temperature", "ph", "tds", "turbidity", "kelayakan"]
+        for key in required_keys:
+            if key not in data:
+                return jsonify({"status": "error", "message": f"Missing key: {key}"}), 400
+
+        print("Received Data:", data)
+        return jsonify({"status": "success", "message": "Data received"}), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/monitoring')
 # @login_required
 def monitoring():
     monitoring_data = get_data()
     if 'user_id' not in session:
-        flash('Please log in to access the dashboard.', 'warning')
+        flash('Please log in to access the monitoring page.', 'warning')
         return redirect(url_for('login'))
     return render_template('monitoring.html', data=monitoring_data)
 
 @app.route('/profile')
 def profile():
     if 'user_id' not in session:
-        flash('Please log in to access the dashboard.', 'warning')
+        flash('Please log in to access the profile page.', 'warning')
         return redirect(url_for('login'))
     return render_template('profile.html')
 
@@ -58,16 +76,15 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
-        # Cek apakah username atau email sudah ada di database
         if database_users.find_one({'username': username}):
             flash('Username already exists. Choose a different one.', 'danger')
         elif database_users.find_one({'email': email}):
             flash('Email already exists. Please use a different email.', 'danger')
         else:
-            hashed_password = generate_password_hash(password)  # Hash password sebelum disimpan
+            hashed_password = generate_password_hash(password) 
             database_users.insert_one({'username': username, 'email': email, 'password': hashed_password})
             flash('Registration successful. You can now log in.', 'success')
-            return redirect(url_for('login'))  # Pastikan ada route `/login`
+            return redirect(url_for('login')) 
 
     return render_template('register.html')
 
@@ -79,11 +96,11 @@ def login():
 
         user = database_users.find_one({'email': email})
         
-        if user and check_password_hash(user['password'], password):  # Cek password hash
-            session['user_id'] = str(user['_id'])  # Simpan ID user ke sesi
+        if user and check_password_hash(user['password'], password):
+            session['user_id'] = str(user['_id']) 
             session['email'] = user['email']
             flash('Login successful.', 'success')
-            return redirect(url_for('dashboard'))  # Arahkan ke dashboard
+            return redirect(url_for('dashboard'))  
         else:
             flash('Invalid email or password. Please try again.', 'danger')
 
@@ -91,9 +108,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()  # Hapus semua sesi
+    session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
