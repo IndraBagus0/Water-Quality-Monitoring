@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_socketio import SocketIO
-
+import json
+import time
+import random
+import threading
 from src import *
 from configs import Config
 
@@ -10,7 +12,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 mongo = PyMongo(app)
-socketio = SocketIO(app)
+latest_data = {}
 
 @app.route('/')
 def index():
@@ -24,26 +26,6 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
-@app.route('/data', methods=['POST'])
-def receive_data():
-    try:
-        data = request.get_json()
-
-        if not data:
-            return jsonify({"status": "error", "message": "No JSON received"}), 400
-
-        required_keys = ["temperature", "ph", "tds", "turbidity", "kelayakan"]
-        for key in required_keys:
-            if key not in data:
-                return jsonify({"status": "error", "message": f"Missing key: {key}"}), 400
-
-        print("Received Data:", data)
-        socketio.emit('update_data', data)
-        return jsonify({"status": "success", "message": "Data received"}), 200
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
 @app.route('/monitoring')
 # @login_required
 def monitoring():
@@ -52,6 +34,40 @@ def monitoring():
         flash('Please log in to access the monitoring page.', 'warning')
         return redirect(url_for('login'))
     return render_template('monitoring.html', data=monitoring_data)
+
+@app.route('/data', methods=['POST'])
+def receive_data():
+    global latest_data
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "No JSON received"}), 400
+
+        required_keys = ["temperature", "ph", "tds", "turbidity", "kelayakan"]
+        for key in required_keys:
+            if key not in data:
+                return jsonify({"status": "error", "message": f"Missing key: {key}"}), 400
+
+        latest_data = data  # Simpan data terbaru
+        print("Received Data:", data)
+
+        return jsonify({"status": "success", "message": "Data received"}), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/stream')
+def stream():
+    print("Client connected to SSE")  # Tambahkan log untuk debug
+    def event_stream():
+        global latest_data
+        while True:
+            if latest_data:
+                yield f"data: {json.dumps(latest_data)}\n\n"
+            time.sleep(2)  # Update setiap 2 detik
+
+    return Response(event_stream(), mimetype="text/event-stream")
+
 
 @app.route('/profile')
 def profile():
@@ -116,4 +132,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

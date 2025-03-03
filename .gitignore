@@ -21,3 +21,5 @@ __pycache__/
 # Ignore IDE/editor settings
 .vscode/
 .idea/
+venv
+Admin Page
