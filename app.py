@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_socketio import SocketIO
 
 from src import *
 from configs import Config
@@ -9,6 +10,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 mongo = PyMongo(app)
+socketio = SocketIO(app)
 
 @app.route('/')
 def index():
@@ -36,6 +38,7 @@ def receive_data():
                 return jsonify({"status": "error", "message": f"Missing key: {key}"}), 400
 
         print("Received Data:", data)
+        socketio.emit('update_data', data)
         return jsonify({"status": "success", "message": "Data received"}), 200
 
     except Exception as e:
@@ -113,4 +116,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

@@ -30,7 +30,7 @@
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                         <h6 class="text-muted font-semibold">Kulitas Air</h6>
-                                        <h6 class="font-extrabold mb-0">Layak</h6>
+                                        <h6 id="kelayakan" class="font-extrabold mb-0">-</h6>
                                     </div>
                                 </div>
                             </div>
@@ -46,7 +46,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Waktu <span class="font-extrabold mb-0" id="date"></span></h6>
+                                        <h6 class="text-muted font-semibold">Waktu <span class="font-extrabold mb-0"
+                                                id="date"></span></h6>
                                         <h6 id="time" class="font-extrabold mb-0"></h6>
                                     </div>
 
@@ -85,7 +86,7 @@
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                         <h6 class="text-muted font-semibold">Suhu</h6>
-                                        <h6 class="font-extrabold mb-0">49 °C</h6>
+                                        <h6 id="temperature" class="font-extrabold mb-0">-</h6>
                                     </div>
                                 </div>
                             </div>
@@ -102,7 +103,7 @@
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                         <h6 class="text-muted font-semibold">pH</h6>
-                                        <h6 class="font-extrabold mb-0">9.3</h6>
+                                        <h6 id="ph" class="font-extrabold mb-0">-</h6>
                                     </div>
                                 </div>
                             </div>
@@ -119,7 +120,7 @@
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                         <h6 class="text-muted font-semibold">TDS</h6>
-                                        <h6 class="font-extrabold mb-0">80.000 PPM</h6>
+                                        <h6 id="tds" class="font-extrabold mb-0">-</h6>
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +137,7 @@
                                     </div>
                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
                                         <h6 class="text-muted font-semibold">Kekeruhan</h6>
-                                        <h6 class="font-extrabold mb-0">112 NTU</h6>
+                                        <h6 id="turbidity" class="font-extrabold mb-0"></h6>
                                     </div>
                                 </div>
                             </div>
@@ -363,6 +364,17 @@
                     window.location.href = "{{ url_for('logout') }}"; // Arahkan ke Flask Logout
                 }
             });
+        });
+    </script>
+    <script>
+        var socket = io();
+
+        socket.on('update_data', function (data) {
+            document.getElementById('temperature').innerText = data.temperature + " °C";
+            document.getElementById('ph').innerText = data.ph;
+            document.getElementById('tds').innerText = data.tds + " PPM";
+            document.getElementById('turbidity').innerText = data.turbidity + " NTU";
+            document.getElementById('kelayakan').innerText = data.kelayakan;
         });
     </script>
     {% endblock %}
