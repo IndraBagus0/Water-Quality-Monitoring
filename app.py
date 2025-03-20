@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
+from markupsafe import Markup
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
@@ -6,8 +7,10 @@ import time
 import random
 import threading
 from src import *
+from bson import ObjectId, Binary
 from configs import Config
-
+import base64
+from datetime import datetime
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
@@ -20,20 +23,55 @@ def index():
 
 @app.route('/dashboard')
 def dashboard():
-    print(session)
     if 'user_id' not in session:
-        flash('Please log in to access the dashboard.', 'warning')
+        flash('Sesi login anda telah habis', 'warning')
         return redirect(url_for('login'))
-    return render_template('dashboard.html')
+    user = database_users.find_one({"_id": ObjectId(session["user_id"])})
+    list_admin = admin_data()
+    return render_template('dashboard.html', user=user, list_admin=list_admin)
 
 @app.route('/monitoring')
-# @login_required
 def monitoring():
     monitoring_data = get_data()
     if 'user_id' not in session:
-        flash('Please log in to access the monitoring page.', 'warning')
+        flash('Sesi login anda telah habis', 'warning')
         return redirect(url_for('login'))
     return render_template('monitoring.html', data=monitoring_data)
+
+@app.route('/filter-monitoring', methods=['GET'])
+def filter_monitoring():
+    start_date = request.args.get("start")
+    end_date = request.args.get("end")
+
+    if not start_date or not end_date:
+        return jsonify({"error": "Tanggal tidak valid"}), 400
+
+    try:
+        # Konversi format input "YYYY-MM-DD" ke "YYYY-MM-DD HH:MM:SS"
+        start_dt = datetime.strptime(start_date + " 00:00:00", "%Y-%m-%d %H:%M:%S")
+        end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+
+        # Query data dari MongoDB
+        filtered_data = database_sensor.find({
+            "timestamp": {"$gte": start_date, "$lte": end_date}
+        }).sort('timestamp', -1)
+
+        result = []
+        for idx, record in enumerate(filtered_data, start=1):
+            result.append({
+                "no": idx,
+                "timestamp": record['timestamp'],  # Tetap dalam format string
+                "ph": record['ph'],
+                "temperature": f"{record['temperature']} Derajat",
+                "tds": f"{record['tds']} PPM",
+                "turbidity": f"{record['turbidity']} NTU",
+                "water_quality": record['water_quality']
+            })
+
+        return jsonify(result)
+
+    except ValueError:
+        return jsonify({"error": "Format tanggal salah"}), 400
 
 @app.route('/data', methods=['POST'])
 def receive_data():
@@ -49,7 +87,7 @@ def receive_data():
                 return jsonify({"status": "error", "message": f"Missing key: {key}"}), 400
 
         latest_data = data  # Simpan data terbaru
-        print("Received Data:", data)
+        # print("Received Data:", data)
 
         return jsonify({"status": "success", "message": "Data received"}), 200
 
@@ -68,13 +106,68 @@ def stream():
 
     return Response(event_stream(), mimetype="text/event-stream")
 
+@app.template_filter('b64encode')
+def b64encode_filter(data):
+    return base64.b64encode(data).decode('utf-8') if data else ''
 
-@app.route('/profile')
+@app.route('/profile', methods=["GET", "POST"]) 
 def profile():
     if 'user_id' not in session:
-        flash('Please log in to access the profile page.', 'warning')
+        flash('Sesi login anda telah habis', 'warning')
         return redirect(url_for('login'))
-    return render_template('profile.html')
+    
+    user = database_users.find_one({"_id": ObjectId(session["user_id"])})
+
+    if request.method == 'POST':
+        old_password = request.form.get("old_password")
+        new_password = request.form.get("new_password")
+
+        # Jika user ingin mengganti password
+        if old_password and new_password:
+            if not user or "password" not in user:
+                flash("Terjadi kesalahan, silakan login ulang.", "danger")
+                return redirect(url_for('profile'))
+
+            # Verifikasi password lama
+            if not check_password_hash(user["password"], old_password):
+                flash("Kata sandi lama salah!", "danger")
+                return redirect(url_for('profile'))
+
+            # Hash password baru dan update di database
+            hashed_new_password = generate_password_hash(new_password)
+            database_users.update_one(
+                {"_id": ObjectId(session["user_id"])},
+                {"$set": {"password": hashed_new_password}}
+            )
+
+            flash("Berhasil mengubah kata sandi!", "success")
+            return redirect(url_for('profile'))
+
+        # Update data lain (tanpa mengubah password)
+        updated_data = {
+            "name": request.form.get("name", "").strip() or "Belum di isi",
+            "username": request.form.get("username", "").strip() or "Belum di isi",
+            "email": request.form.get("email", "").strip() or "Belum di isi",
+            "phone": request.form.get("phone", "").strip() or "Belum di isi",
+            "address": request.form.get("address", "").strip() or "Belum di isi"
+        }
+
+        # Jika ada upload foto profil
+        if "profile_pic" in request.files:
+            file = request.files["profile_pic"]
+            if file.filename != "":
+                image_data = file.read()
+                updated_data["profile_pic"] = Binary(image_data)
+
+        database_users.update_one(
+            {"_id": ObjectId(session["user_id"])}, 
+            {"$set": updated_data}
+        )
+
+        flash("Profil berhasil diperbarui!", "success")
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', user=user)
 
 @app.errorhandler(403)
 def forbidden(error):
@@ -118,7 +211,8 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user_id'] = str(user['_id']) 
             session['email'] = user['email']
-            flash('Login successful.', 'success')
+            session['username'] = user['username']
+            # flash('Login successful.', 'success')
             return redirect(url_for('dashboard'))  
         else:
             flash('Invalid email or password. Please try again.', 'danger')
@@ -128,7 +222,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('You have been logged out.', 'info')
+    flash('Kamu telah logout.', 'info')
     return redirect(url_for('login'))
 
 if __name__ == '__main__':

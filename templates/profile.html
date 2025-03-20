@@ -3,7 +3,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
- <script src="{{ url_for('static', filename='assets/static/js/initTheme.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/static/js/initTheme.js') }}"></script>
 
 <div id="main">
     <header class="mb-3">
@@ -36,84 +36,97 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header" style="padding-bottom: 5px;">
-                            <h4 class="card-title">Multiple Column</h4>
+                            <h4 class="card-title">Edit Profile</h4>
                         </div>
                         <div class="card-content">
                             <div class="card-body" style="padding-top: 10px;">
-                                <form class="form">
+                                <form class="form" method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="old_password" id="old_password">
+                                    <input type="hidden" name="new_password" id="new_password">
                                     <div class="row">
                                         <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="first-name-column">Nama</label>
-                                                <input type="text" id="first-name-column" class="form-control"
-                                                    placeholder="First Name" name="fname-column">
+                                                <label for="name-column">Nama</label>
+                                                <input type="text" id="name-column" class="form-control"
+                                                    placeholder="Nama" name="name"
+                                                    value="{{ user.get('name', 'Belum di isi') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="last-name-column">Username</label>
-                                                <input type="text" id="last-name-column" class="form-control"
-                                                    placeholder="Last Name" name="lname-column">
+                                                <label for="username-column">Username</label>
+                                                <input type="text" id="username-column" class="form-control"
+                                                    placeholder="Username" name="username"
+                                                    value="{{ user.get('username', 'Belum di isi') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="city-column">Email</label>
-                                                <input type="text" id="city-column" class="form-control"
-                                                    placeholder="City" name="city-column">
+                                                <label for="email-column">Email</label>
+                                                <input type="text" id="email-column" class="form-control"
+                                                    placeholder="Email" name="email"
+                                                    value="{{ user.get('email', 'Belum di isi') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="country-floating">No Telp</label>
-                                                <input type="text" id="country-floating" class="form-control"
-                                                    name="country-floating" placeholder="Country">
+                                                <label for="phone-column">No Telp</label>
+                                                <input type="text" id="phone-column" class="form-control" name="phone"
+                                                    placeholder="No Telp"
+                                                    value="{{ user.get('phone', 'Belum di isi') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="email-id-column">Email</label>
-                                                <input type="email" id="email-id-column" class="form-control"
-                                                    name="email-id-column" placeholder="Email">
+                                                <label for="profile-pic">Foto Profil</label>
+                                                <input type="file" id="profile-pic" class="form-control"
+                                                    name="profile_pic" accept="image/*" hidden>
+
+                                                <div class="mt-1">
+                                                    {% if user.get('profile_pic') %}
+                                                    <div class="avatar avatar-xl">
+                                                        <img id="profile-img"
+                                                            src="data:image/png;base64,{{ user['profile_pic'] | b64encode }}"
+                                                            alt="Profile Picture" class="img-thumbnail" width="150"
+                                                            style="cursor: pointer;">
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="avatar avatar-xl">
+                                                        <img id="profile-img"
+                                                            src="{{ url_for('static', filename='assets/compiled/jpg/1.jpg') }}"
+                                                            alt="Default Profile Picture" class="img-thumbnail"
+                                                            width="150" style="cursor: pointer;">
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-6 col-12">
+                                            <div class="form-group">
+                                                <label for="alamat">Alamat</label>
+                                                <input type="text" id="alamat" class="form-control" name="address"
+                                                    placeholder="Alamat"
+                                                    value="{{ user.get('address', 'Belum di isi') }}">
+                                            </div>
+                                        </div>
+
+
+
+
                                         <div class="col-12 d-flex justify-content-end">
-                                            <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
-                                            <button type="reset"
-                                                class="btn btn-light-secondary me-1 mb-1">Reset</button>
+                                            <button type="button" class="btn btn-primary me-1 mb-1"
+                                                id="change-password-btn">
+                                                Ubah Kata Sandi
+                                            </button>
+                                            <button type="submit" class="btn btn-primary me-1 mb-1">Simpan</button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-header" style="padding-bottom: 5px;">
-                            <h4 class="card-title">Ubah Kata Sandi</h4>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-body" style="padding-top: 10px;">
-                                <form class="form">
-                                    <div class="row">
-                                        <div class="col-md-6 col-12">
-                                            <div class="form-group">
-                                                <label for="first-name-column">Kata Sandi Baru</label>
-                                                <input type="text" id="first-name-column" class="form-control"
-                                                    placeholder="First Name" name="fname-column">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-12">
-                                            <div class="form-group">
-                                                <label for="last-name-column">Konfirmasi Kata Sandi</label>
-                                                <input type="text" id="last-name-column" class="form-control"
-                                                    placeholder="Last Name" name="lname-column">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </section>
@@ -132,4 +145,149 @@
         </div>
     </footer>
 </div>
+{% with messages = get_flashed_messages(with_categories=True) %}
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let messages = {{ messages | tojson
+    }};
+    let categoryIcons = {
+        "success": "success",
+        "error": "error",
+        "warning": "warning",
+        "info": "info"
+    };
+
+    messages.forEach(msg => {
+        let category = msg[0];  // Ambil kategori pesan
+        let text = msg[1];      // Ambil teks pesan
+
+        Swal.fire({
+            icon: categoryIcons[category] || "info",
+            title: category.charAt(0).toUpperCase() + category.slice(1),
+            text: text,
+            confirmButtonText: "OK"
+        });
+    });
+            });
+</script>
+{% endif %}
+{% endwith %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const profileImg = document.getElementById("profile-img");
+        const profileInput = document.getElementById("profile-pic");
+
+        if (profileImg) {
+            profileImg.addEventListener("click", async function () {
+                const { value: file } = await Swal.fire({
+                    title: "Foto Profil",
+                    html: `
+                    <img id="swal-preview" src="${profileImg.src}" alt="Profile Picture" class="img-fluid mb-3" style="max-width: 100%; border-radius: 10px;">
+                    <input type="file" id="swal-profile-pic" class="form-control" accept="image/*">
+                `,
+                    showCancelButton: true,
+                    confirmButtonText: "Gunakan Foto Ini",
+                    didOpen: () => {
+                        document.getElementById("swal-profile-pic").addEventListener("change", function (event) {
+                            const file = event.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    document.getElementById("swal-preview").src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
+                    },
+                    preConfirm: () => {
+                        const fileInput = document.getElementById("swal-profile-pic");
+                        if (!fileInput.files.length) {
+                            return null;
+                        }
+                        return fileInput.files[0];
+                    }
+                });
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        profileImg.src = e.target.result;
+
+                        // Simpan file di input form agar bisa dikirim ke server saat submit
+                        let dataTransfer = new DataTransfer();
+                        let newFile = new File([file], file.name, { type: file.type });
+                        dataTransfer.items.add(newFile);
+                        profileInput.files = dataTransfer.files;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        const changePasswordBtn = document.getElementById("change-password-btn");
+
+        if (changePasswordBtn) {
+            changePasswordBtn.addEventListener("click", async function () {
+                const { value: oldPassword } = await Swal.fire({
+                    title: "Masukkan Kata Sandi Lama",
+                    input: "password",
+                    inputLabel: "Kata Sandi Lama",
+                    inputPlaceholder: "Masukkan kata sandi lama",
+                    inputAttributes: {
+                        maxlength: "20",
+                        autocapitalize: "off",
+                        autocorrect: "off"
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Lanjutkan",
+                    cancelButtonText: "Batal",
+                    preConfirm: (oldPassword) => {
+                        if (!oldPassword) {
+                            Swal.showValidationMessage("Harap masukkan kata sandi lama!");
+                        }
+                        return oldPassword;
+                    }
+                });
+
+                if (!oldPassword) return;
+
+                const { value: newPassword } = await Swal.fire({
+                    title: "Masukkan Kata Sandi Baru",
+                    input: "password",
+                    inputLabel: "Kata Sandi Baru",
+                    inputPlaceholder: "Masukkan kata sandi baru",
+                    inputAttributes: {
+                        maxlength: "20",
+                        autocapitalize: "off",
+                        autocorrect: "off"
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Simpan",
+                    cancelButtonText: "Batal",
+                    preConfirm: (newPassword) => {
+                        if (!newPassword) {
+                            Swal.showValidationMessage("Kata sandi baru tidak boleh kosong!");
+                        }
+                        return newPassword;
+                    }
+                });
+
+                if (newPassword) {
+                    document.getElementById("old_password").value = oldPassword;
+                    document.getElementById("new_password").value = newPassword;
+
+                    // Submit form secara otomatis setelah password diisi
+                    document.querySelector("form").submit();
+                }
+            });
+        }
+    });
+
+</script>
+
+
+
+
 {% endblock %}

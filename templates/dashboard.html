@@ -4,7 +4,7 @@
 
 {% block content %}
 <!--  <script src="{{ url_for('static', filename='assets/static/js/initTheme.js') }}"></script> -->
- <script src="{{ url_for('static', filename='assets/static/js/initTheme.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/static/js/initTheme.js') }}"></script>
 
 <div id="main">
     <header class="mb-3">
@@ -170,7 +170,7 @@
                                             <svg class="bi text-primary" width="32" height="32" fill="blue"
                                                 style="width:10px">
                                                 <use
-                                                xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
+                                                    xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
                                             </svg>
                                             <h5 class="mb-0 ms-3">Europe</h5>
                                         </div>
@@ -188,7 +188,7 @@
                                             <svg class="bi text-success" width="32" height="32" fill="blue"
                                                 style="width:10px">
                                                 <use
-                                                xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
+                                                    xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
                                             </svg>
                                             <h5 class="mb-0 ms-3">America</h5>
                                         </div>
@@ -206,7 +206,7 @@
                                             <svg class="bi text-danger" width="32" height="32" fill="blue"
                                                 style="width:10px">
                                                 <use
-                                                xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
+                                                    xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
                                             </svg>
 
                                             <h5 class="mb-0 ms-3">Indonesia</h5>
@@ -242,7 +242,8 @@
                                                     <div class="d-flex align-items-center">
                                                         <div class="avatar avatar-md">
                                                             <!-- <img src="./assets/compiled/jpg/5.jpg"> -->
-                                                             <img src="{{ url_for('static', filename='./assets/compiled/jpg/5.jpg')}}" alt="">
+                                                            <img src="{{ url_for('static', filename='./assets/compiled/jpg/5.jpg')}}"
+                                                                alt="">
 
                                                         </div>
                                                         <p class="font-bold ms-3 mb-0">Si Cantik</p>
@@ -256,7 +257,8 @@
                                                 <td class="col-3">
                                                     <div class="d-flex align-items-center">
                                                         <div class="avatar avatar-md">
-                                                            <img src="{{ url_for('static', filename='./assets/compiled/jpg/2.jpg')}}" alt="">
+                                                            <img src="{{ url_for('static', filename='./assets/compiled/jpg/2.jpg')}}"
+                                                                alt="">
                                                         </div>
                                                         <p class="font-bold ms-3 mb-0">Si Ganteng</p>
                                                     </div>
@@ -280,53 +282,53 @@
                     <div class="card-body py-4 px-4">
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-xl">
-                                <img src="{{ url_for('static', filename='./assets/compiled/jpg/1.jpg')}}" alt="Face 1">
+                                
+                                {% if user.get('profile_pic') %}
+                                        <div class="avatar avatar-xl me-3">
+                                            <img src="data:image/png;base64,{{ user['profile_pic'] | b64encode }}"
+                                                alt="Profile Picture">
+                                        </div>
+                                        
+                                        {% else %}
+                                        <div class="avatar avatar-xl me-3">
+                                            <img src="{{ url_for('static', filename='./assets/compiled/jpg/1.jpg')}}" alt="Face 1">
+                                        </div>
+                                        {% endif %}
                             </div>
                             <div class="ms-3 name">
-                                <h5 class="font-bold">John Duck</h5>
-                                <h6 class="text-muted mb-0">@johnducky</h6>
+                                <h5 class="font-bold">{{ user.get('username')}}</h5>
+                                <h6 class="text-muted mb-0">{{ user.email }}</h6>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Recent Messages</h4>
+                        <h4>Daftar Pengguna</h4>
                     </div>
                     <div class="card-content pb-4">
+                        {% for admin in list_admin[:3] %}
                         <div class="recent-message d-flex px-4 py-3">
                             <div class="avatar avatar-lg">
-                                <img src="{{ url_for('static', filename='./assets/compiled/jpg/4.jpg')}}" alt="">
+                                {% if admin.profile_pic %}
+                                    <img src="data:image/png;base64,{{ admin.profile_pic }}" alt="Profile Picture">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='./assets/compiled/jpg/default.jpg') }}" alt="Default Avatar">
+                                {% endif %}
                             </div>
+                            
                             <div class="name ms-4">
-                                <h5 class="mb-1">Hank Schrader</h5>
-                                <h6 class="text-muted mb-0">@johnducky</h6>
+                                <h5 class="mb-1">{{ admin.name }}</h5>
+                                <h6 class="text-muted mb-0">@{{ admin.username }}</h6>
                             </div>
                         </div>
-                        <div class="recent-message d-flex px-4 py-3">
-                            <div class="avatar avatar-lg">
-                                <img src="{{ url_for('static', filename='./assets/compiled/jpg/5.jpg')}}" alt="">
-                            </div>
-                            <div class="name ms-4">
-                                <h5 class="mb-1">Dean Winchester</h5>
-                                <h6 class="text-muted mb-0">@imdean</h6>
-                            </div>
-                        </div>
-                        <div class="recent-message d-flex px-4 py-3">
-                            <div class="avatar avatar-lg">
-                                <img src="{{ url_for('static', filename='./assets/compiled/jpg/1.jpg')}}" alt="">
-                            </div>
-                            <div class="name ms-4">
-                                <h5 class="mb-1">John Dodol</h5>
-                                <h6 class="text-muted mb-0">@dodoljohn</h6>
-                            </div>
-                        </div>
+                        {% endfor %}
                         <div class="px-4">
-                            <button class='btn btn-block btn-xl btn-outline-primary font-bold mt-3'>Start
-                                Conversation</button>
+                            <button class='btn btn-block btn-xl btn-outline-primary font-bold mt-3'>Lebih Banyak</button>
                         </div>
                     </div>
                 </div>
+                
                 <div class="card">
                     <div class="card-header">
                         <h4>Visitors Profile</h4>
@@ -350,31 +352,12 @@
             </div>
         </div>
     </footer>
-    <script>
-        document.getElementById('logout').addEventListener('click', function (event) {
-            event.preventDefault(); // Mencegah logout langsung
 
-            Swal.fire({
-                title: "Apakah Anda yakin?",
-                text: "Anda akan keluar dari sesi ini.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Ya, Logout!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ url_for('logout') }}"; // Arahkan ke Flask Logout
-                }
-            });
-        });
-    </script>
     <script>
         console.log("Connecting to SSE stream...");
         const eventSource = new EventSource('/stream');
 
-        eventSource.onmessage = function(event) {
+        eventSource.onmessage = function (event) {
             const data = JSON.parse(event.data);
             document.getElementById('temperature').innerText = data.temperature + " °C";
             document.getElementById('ph').innerText = data.ph;
@@ -383,7 +366,7 @@
             document.getElementById('kelayakan').innerText = data.kelayakan;
         };
 
-        eventSource.onerror = function() {
+        eventSource.onerror = function () {
             console.error("Error connecting to SSE stream.");
         };
     </script>
