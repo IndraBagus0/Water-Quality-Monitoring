@@ -40,6 +40,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Waktu</th>
+                                    <th>Lokasi</th>
                                     <th>pH</th>
                                     <th>Suhu</th>
                                     <th>TDS</th>
@@ -52,11 +53,12 @@
                                 <tr>
                                     <td>{{ record.no }}</td>
                                     <td>{{ record.timestamp }}</td>
+                                    <td>{{ record.location }}</td>
                                     <td>{{ record.ph }}</td>
                                     <td>{{ record.temperature }}</td>
                                     <td>{{ record.tds }}</td>
                                     <td>{{ record.turbidity }}</td>
-                                    <td>{{ record.water_quality }}</td>
+                                    <td>{{ record.kelayakan }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -168,7 +170,7 @@
                                     <td>${item.temperature}</td>
                                     <td>${item.tds}</td>
                                     <td>${item.turbidity}</td>
-                                    <td>${item.water_quality}</td>
+                                    <td>${item.kelayakan}</td>
                                 </tr>
                             `;
                             });
@@ -185,7 +187,7 @@
                                 "Suhu": item.temperature,
                                 "TDS": item.tds,
                                 "Kekeruhan": item.turbidity,
-                                "Kualitas Air": item.water_quality
+                                "Kualitas Air": item.kelayakan
                             })));
 
                             XLSX.utils.book_append_sheet(wb, ws, "Filtered Data");

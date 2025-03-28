@@ -11,11 +11,14 @@ from bson import ObjectId, Binary
 from configs import Config
 import base64
 from datetime import datetime
+import pytz 
+
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 mongo = PyMongo(app)
 latest_data = {}
+jakarta_tz = pytz.timezone("Asia/Jakarta")
 
 @app.route('/')
 def index():
@@ -32,11 +35,28 @@ def dashboard():
 
 @app.route('/monitoring')
 def monitoring():
-    monitoring_data = get_data()
     if 'user_id' not in session:
         flash('Sesi login anda telah habis', 'warning')
         return redirect(url_for('login'))
+    monitoring_data = get_data()
     return render_template('monitoring.html', data=monitoring_data)
+
+@app.route('/device-list', methods=['GET'])
+def device_list():
+    try:
+        devices = list(database_alat.find({}, {"_id": 0, "device_id": 1}))
+        device_count = len(devices)  # Hitung jumlah perangkat
+        
+        return jsonify({"status": "success", "devices": devices, "count": device_count}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/list-users')
+def users():
+    list_user = admin_data()
+    print(list_user)
+    return render_template('users.html', list_user=list_user)
 
 @app.route('/filter-monitoring', methods=['GET'])
 def filter_monitoring():
@@ -47,11 +67,9 @@ def filter_monitoring():
         return jsonify({"error": "Tanggal tidak valid"}), 400
 
     try:
-        # Konversi format input "YYYY-MM-DD" ke "YYYY-MM-DD HH:MM:SS"
         start_dt = datetime.strptime(start_date + " 00:00:00", "%Y-%m-%d %H:%M:%S")
         end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
 
-        # Query data dari MongoDB
         filtered_data = database_sensor.find({
             "timestamp": {"$gte": start_date, "$lte": end_date}
         }).sort('timestamp', -1)
@@ -60,12 +78,12 @@ def filter_monitoring():
         for idx, record in enumerate(filtered_data, start=1):
             result.append({
                 "no": idx,
-                "timestamp": record['timestamp'],  # Tetap dalam format string
+                "timestamp": record['timestamp'], 
                 "ph": record['ph'],
                 "temperature": f"{record['temperature']} Derajat",
                 "tds": f"{record['tds']} PPM",
                 "turbidity": f"{record['turbidity']} NTU",
-                "water_quality": record['water_quality']
+                "kelayakan": record['kelayakan']
             })
 
         return jsonify(result)
@@ -77,6 +95,15 @@ def filter_monitoring():
 def receive_data():
     global latest_data
     try:
+        api_key = request.headers.get("X-API-KEY")
+        if not api_key:
+            return jsonify({"status": "error", "message": "API Key is missing"}), 401
+
+        device = database_alat.find_one({"api_key": api_key})
+        if not device:
+            return jsonify({"status": "error", "message": "Invalid API Key"}), 403
+        location = device.get("location", "Unknown")
+        print(location)
         data = request.get_json()
         if not data:
             return jsonify({"status": "error", "message": "No JSON received"}), 400
@@ -85,9 +112,20 @@ def receive_data():
         for key in required_keys:
             if key not in data:
                 return jsonify({"status": "error", "message": f"Missing key: {key}"}), 400
-
-        latest_data = data  # Simpan data terbaru
-        # print("Received Data:", data)
+        timestamp = datetime.now(jakarta_tz).strftime('%Y-%m-%d %H:%M:%S')
+        sensor_entry = {
+            "device_id": device["_id"], 
+            "location": location, 
+            "temperature": data["temperature"],
+            "ph": data["ph"],
+            "tds": data["tds"],
+            "turbidity": data["turbidity"],
+            "kelayakan": data["kelayakan"],
+            "timestamp": timestamp
+        }
+        database_sensor.insert_one(sensor_entry)
+        print("Data received:", sensor_entry)
+        latest_data = sensor_entry  
 
         return jsonify({"status": "success", "message": "Data received"}), 200
 
@@ -96,15 +134,34 @@ def receive_data():
 
 @app.route('/stream')
 def stream():
-    print("Client connected to SSE")  # Tambahkan log untuk debug
+    print("Client connected to SSE")
     def event_stream():
         global latest_data
         while True:
             if latest_data:
-                yield f"data: {json.dumps(latest_data)}\n\n"
-            time.sleep(2)  # Update setiap 2 detik
+                data_copy = latest_data.copy()
+                data_copy.pop("_id", None)
+                data_copy["device_id"] = str(data_copy["device_id"]) if isinstance(data_copy["device_id"], ObjectId) else data_copy["device_id"]
+                yield f"data: {json.dumps(data_copy)}\n\n"
+            time.sleep(2)
 
     return Response(event_stream(), mimetype="text/event-stream")
+
+@app.route('/add-device', methods=['POST'])
+def add_device():
+    try:
+        data = request.get_json()
+        device_id = data.get("device_id")
+        location = data.get("location")
+
+        if not device_id or not location:
+            return jsonify({"status": "error", "message": "Device ID dan Lokasi harus diisi"}), 400
+
+        api_key = save_api_key(device_id, location)
+        return jsonify({"status": "success", "api_key": api_key}), 201
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.template_filter('b64encode')
 def b64encode_filter(data):

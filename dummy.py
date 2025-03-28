@@ -3,7 +3,7 @@ import json
 import time
 import random
 
-URL = "http://139.59.32.24:5000/data"
+URL = "http://192.168.0.4:5000/data"
 
 def generate_dummy_data():
     return {
@@ -16,15 +16,17 @@ def generate_dummy_data():
 
 def send_data():
     while True:
+        headers = {"Content-Type": "application/json",
+                   "X-API-KEY": "5db13ead396119a045c43a55d3e5abec"}
         data = generate_dummy_data()
-        response = requests.post(URL, json=data)
+        response = requests.post(URL, headers=headers, json=data)
         
         if response.status_code == 200:
             print(f"✅ Data sent: {data}")
         else:
             print(f"❌ Failed to send data: {response.text}")
 
-        time.sleep(5)  # Tunggu 5 detik sebelum mengirim lagi
+        time.sleep(5) 
 
 if __name__ == "__main__":
     send_data()
