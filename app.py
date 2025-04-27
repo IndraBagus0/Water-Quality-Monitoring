@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import time
 import random
+import secrets
 import threading
 from src import *
 from bson import ObjectId, Binary
@@ -31,7 +32,9 @@ def dashboard():
         return redirect(url_for('login'))
     user = database_users.find_one({"_id": ObjectId(session["user_id"])})
     list_admin = admin_data()
-    return render_template('dashboard.html', user=user, list_admin=list_admin)
+    chart_data_ph_temperatur = get_chart_data_ph_temperature()
+
+    return render_template('dashboard.html', user=user, list_admin=list_admin, chart_data_ph_temperatur=json.dumps(chart_data_ph_temperatur))
 
 @app.route('/monitoring')
 def monitoring():
@@ -41,16 +44,36 @@ def monitoring():
     monitoring_data = get_data()
     return render_template('monitoring.html', data=monitoring_data)
 
-@app.route('/device-list', methods=['GET'])
-def device_list():
-    try:
-        devices = list(database_alat.find({}, {"_id": 0, "device_id": 1}))
-        device_count = len(devices)  # Hitung jumlah perangkat
-        
-        return jsonify({"status": "success", "devices": devices, "count": device_count}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+@app.route('/alat')
+def alat():
+    if 'user_id' not in session:
+        flash('Sesi login anda telah habis', 'warning')
+        return redirect(url_for('login'))
+    data_alat = alat_data()
+    return render_template('alat.html', data_alat=data_alat, role=session.get('role'))
 
+@app.route('/ubah-api-key', methods=['POST'])
+def ubah_api_key():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
+
+    data = request.get_json()
+    device_id = data.get('device_id')
+
+    if not device_id:
+        return jsonify({'status': 'error', 'message': 'Device ID tidak ditemukan'}), 400
+
+    api_key_baru = secrets.token_hex(16)
+
+    result = database_alat.update_one(
+        {'device_id': device_id},
+        {'$set': {'api_key': api_key_baru}}
+    )
+
+    if result.modified_count == 1:
+        return jsonify({'status': 'success', 'api_key': api_key_baru})
+    else:
+        return jsonify({'status': 'error', 'message': 'Gagal mengubah API key'}), 500
 
 @app.route('/list-users')
 def users():
@@ -103,7 +126,6 @@ def receive_data():
         if not device:
             return jsonify({"status": "error", "message": "Invalid API Key"}), 403
         location = device.get("location", "Unknown")
-        print(location)
         data = request.get_json()
         if not data:
             return jsonify({"status": "error", "message": "No JSON received"}), 400
@@ -146,22 +168,6 @@ def stream():
             time.sleep(2)
 
     return Response(event_stream(), mimetype="text/event-stream")
-
-@app.route('/add-device', methods=['POST'])
-def add_device():
-    try:
-        data = request.get_json()
-        device_id = data.get("device_id")
-        location = data.get("location")
-
-        if not device_id or not location:
-            return jsonify({"status": "error", "message": "Device ID dan Lokasi harus diisi"}), 400
-
-        api_key = save_api_key(device_id, location)
-        return jsonify({"status": "success", "api_key": api_key}), 201
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.template_filter('b64encode')
 def b64encode_filter(data):
@@ -269,6 +275,7 @@ def login():
             session['user_id'] = str(user['_id']) 
             session['email'] = user['email']
             session['username'] = user['username']
+            session['role'] = user['role']
             # flash('Login successful.', 'success')
             return redirect(url_for('dashboard'))  
         else:

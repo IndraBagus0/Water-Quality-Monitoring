@@ -58,37 +58,16 @@
                         <span>Monitoring</span>
                     </a>
                 </li>
-                <li class="sidebar-item has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Perangkat (<span id="device-count" style="margin-left: 0px;">0</span>)</span>
-                    </a>
-
-                    <ul class="submenu" id="device-list">
-                        <li class="submenu-item">
-                            <a href="#" class="submenu-link">Memuat perangkat...</a>
-                        </li>
-                        <li class="submenu-item" id="add-device-item">
-                            <a href="#" class="submenu-link" data-bs-toggle="modal"
-                                data-bs-target="#modalTambahPerangkat">
-                                Tambah Perangkat
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  ">
-                    <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#modalTambahPerangkat"><i
-                            class="bi bi-stack"></i>
-                        <span>Tambah Perangkat</span>
-                    </a>
-
-
-                </li>
                 <li class="sidebar-item {% if request.path == url_for('users') %}active{% endif %}">
                     <a href="{{ url_for('users') }}" class='sidebar-link'>
-                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <i class="bi bi-person-lines-fill"></i>
                         <span>List Admin</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {% if request.path == url_for('alat') %}active{% endif %}">
+                    <a href="{{ url_for('alat') }}" class='sidebar-link'>
+                        <i class="bi bi-gear-fill"></i>
+                        <span>Alat</span>
                     </a>
                 </li>
                 <li class="sidebar-title">Pengguna</li>
@@ -139,73 +118,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.getElementById("formTambahPerangkat").addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        let device_id = document.getElementById("device_id").value;
-        let location = document.getElementById("location").value;
-
-        fetch("/add-device", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ device_id: device_id, location: location })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    alert("Perangkat berhasil ditambahkan! API Key: " + data.api_key);
-                    document.getElementById("formTambahPerangkat").reset();
-                    var modal = bootstrap.Modal.getInstance(document.getElementById('modalTambahPerangkat'));
-                    modal.hide();
-                } else {
-                    alert("Gagal menambahkan perangkat: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("Terjadi kesalahan!");
-            });
-    });
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch('/device-list')
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    let submenu = document.getElementById("device-list");
-                    let countElement = document.getElementById("device-count");
-
-                    submenu.innerHTML = "";
-
-                    countElement.innerText = data.devices.length;
-
-                    data.devices.forEach(device => {
-                        let listItem = document.createElement("li");
-                        listItem.classList.add("submenu-item");
-                        listItem.innerHTML = `<a href="#" class="submenu-link">${device.device_id}</a>`;
-                        submenu.appendChild(listItem);
-                    });
-
-                    // **Tambahkan tombol "Tambah Perangkat" lagi setelah daftar perangkat**
-                    let addDeviceItem = document.createElement("li");
-                    console.log(addDeviceItem);
-                    addDeviceItem.classList.add("submenu-item");
-                    addDeviceItem.innerHTML = `
-                    <a href="#" class="submenu-link" data-bs-toggle="modal" data-bs-target="#modalTambahPerangkat">
-                        Tambah Perangkat
-                    </a>`;
-                    submenu.appendChild(addDeviceItem);
-                }
-            })
-            .catch(error => console.error('Error fetching devices:', error));
-    });
-
-</script>
 <script>
     document.getElementById('logout').addEventListener('click', function (event) {
         event.preventDefault();

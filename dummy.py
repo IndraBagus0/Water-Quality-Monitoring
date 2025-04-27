@@ -3,7 +3,7 @@ import json
 import time
 import random
 
-URL = "http://192.168.0.4:5000/data"
+URL = "http://192.168.1.18:5000/data"
 
 def generate_dummy_data():
     return {
@@ -17,7 +17,7 @@ def generate_dummy_data():
 def send_data():
     while True:
         headers = {"Content-Type": "application/json",
-                   "X-API-KEY": "5db13ead396119a045c43a55d3e5abec"}
+                   "X-API-KEY": "ab40211da4129afecc53250748aa7907"}
         data = generate_dummy_data()
         response = requests.post(URL, headers=headers, json=data)
         
