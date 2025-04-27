@@ -50,6 +50,10 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary me-1 mb-1 mt-3" id="change-alat-btn">Ubah
+                                    Alat</button>
+                            </div>
                         </div>
 
                         <div class="card-header" style="padding-bottom: 5px; padding-top: 1px;">
@@ -168,6 +172,79 @@
             }
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const changeAlatBtn = document.getElementById('change-alat-btn');
+        const deviceIdLama = document.getElementById('device_id').value;  // Ambil nilai device_id
+        const locationLama = document.getElementById('location').value;  // Ambil nilai location
+
+        if (changeAlatBtn) {
+            changeAlatBtn.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                const deviceId = document.getElementById('device_id').value;
+                const location = document.getElementById('location').value;
+
+                // Ambil data lama dari template atau backend (misalnya dari Flask context)
+                const oldDeviceId = (deviceIdLama);  // Data lama dari Flask context
+                const oldLocation = (locationLama);  // Data lama dari Flask context
+
+                // Validasi perubahan data  
+                if (deviceId === oldDeviceId && location === oldLocation) {
+                    Swal.fire({
+                        title: "Tidak ada perubahan",
+                        text: "Data yang dimasukkan sama dengan data sebelumnya.",
+                        icon: "warning",
+                        confirmButtonText: "OK"
+                    });
+                    return;  // Tidak lanjutkan proses update
+                }
+
+                Swal.fire({
+                    title: "Apakah Anda yakin?",
+                    text: "Data alat akan diperbarui.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Update!",
+                    cancelButtonText: "Batal"
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch('/api/update-alat', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    device_id: deviceId,
+                                    location: location
+                                })
+                            });
+
+                            const resJson = await response.json();
+                            console.log(resJson);
+
+                            if (resJson.success) {
+                                Swal.fire('Sukses!', resJson.message, 'success').then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Gagal!', resJson.message, 'error');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            Swal.fire('Error', 'Gagal menghubungi server', 'error');
+                        }
+                    }
+                });
+            });
+        }
+    });
+
+
+
 </script>
 
 {% endblock %}

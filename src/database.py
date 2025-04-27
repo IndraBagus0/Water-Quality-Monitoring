@@ -57,7 +57,9 @@ def get_chart_data_ph_temperature():
             for d in data
         ],
         "temperature": [d["temperature"] for d in data],
-        "ph": [d["ph"] for d in data]
+        "ph": [d["ph"] for d in data],
+        "tds": [d["tds"] for d in data],
+        "turbidity": [d["turbidity"] for d in data]
     }
 
     return chart_data_ph_temperatur

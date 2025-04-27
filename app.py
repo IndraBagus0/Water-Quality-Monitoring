@@ -52,6 +52,31 @@ def alat():
     data_alat = alat_data()
     return render_template('alat.html', data_alat=data_alat, role=session.get('role'))
 
+@app.route('/api/update-alat', methods=['POST'])
+def update_alat():
+    if 'user_id' not in session:
+        return {"success": False, "message": "Sesi habis"}, 401
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
+    data = request.get_json()
+    device_id = data.get("device_id")
+    location = data.get("location")
+
+    if not device_id or not location:
+        return {"success": False, "message": "Data tidak lengkap"}, 400
+
+    # Update alat di database
+    result = database_alat.update_one(
+        {"device_id": device_id},
+        {"$set": {"location": location}}
+    )
+
+    if result.matched_count == 0:
+        return {"success": False, "message": "Alat tidak ditemukan"}, 404
+
+    return {"success": True, "message": "Data alat berhasil diperbarui"}, 200
+
+
 @app.route('/ubah-api-key', methods=['POST'])
 def ubah_api_key():
     if 'role' not in session or session['role'] != 'admin':
@@ -79,6 +104,9 @@ def ubah_api_key():
 def users():
     list_user = admin_data()
     print(list_user)
+    if 'role' not in session or session['role'] != 'admin':
+
+        return redirect(request.referrer or url_for('dashboard'))
     return render_template('users.html', list_user=list_user)
 
 @app.route('/filter-monitoring', methods=['GET'])
@@ -179,32 +207,13 @@ def profile():
         flash('Sesi login anda telah habis', 'warning')
         return redirect(url_for('login'))
     
+    print(f"Debug: user_id dari session -> {session['user_id']}")
+    
     user = database_users.find_one({"_id": ObjectId(session["user_id"])})
+    print(f"Debug: Data user dari database -> {user}")
 
     if request.method == 'POST':
-        old_password = request.form.get("old_password")
-        new_password = request.form.get("new_password")
 
-        # Jika user ingin mengganti password
-        if old_password and new_password:
-            if not user or "password" not in user:
-                flash("Terjadi kesalahan, silakan login ulang.", "danger")
-                return redirect(url_for('profile'))
-
-            # Verifikasi password lama
-            if not check_password_hash(user["password"], old_password):
-                flash("Kata sandi lama salah!", "danger")
-                return redirect(url_for('profile'))
-
-            # Hash password baru dan update di database
-            hashed_new_password = generate_password_hash(new_password)
-            database_users.update_one(
-                {"_id": ObjectId(session["user_id"])},
-                {"$set": {"password": hashed_new_password}}
-            )
-
-            flash("Berhasil mengubah kata sandi!", "success")
-            return redirect(url_for('profile'))
 
         # Update data lain (tanpa mengubah password)
         updated_data = {
@@ -232,6 +241,49 @@ def profile():
 
     return render_template('profile.html', user=user)
 
+@app.route('/api/verify-password', methods=["POST"])
+def api_verify_password():
+    if 'user_id' not in session:
+        return {"success": False, "message": "Sesi habis"}, 401
+
+    data = request.get_json()
+    old_password = data.get("old_password")
+
+    user = database_users.find_one({"_id": ObjectId(session["user_id"])})
+    if not user or "password" not in user:
+        return {"success": False, "message": "User tidak ditemukan"}, 400
+
+    if not check_password_hash(user["password"], old_password):
+        return {"success": False, "message": "Password lama salah"}, 400
+
+    return {"success": True, "message": "Password lama benar"}, 200
+
+
+@app.route('/api/change-password', methods=["POST"])
+def api_change_password():
+    if 'user_id' not in session:
+        return {"success": False, "message": "Sesi habis"}, 401
+
+    data = request.get_json()
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+
+    user = database_users.find_one({"_id": ObjectId(session["user_id"])})
+    if not user or "password" not in user:
+        return {"success": False, "message": "User tidak ditemukan"}, 400
+
+    if not check_password_hash(user["password"], old_password):
+        return {"success": False, "message": "Password lama salah"}, 400
+
+    hashed_new_password = generate_password_hash(new_password)
+    database_users.update_one(
+        {"_id": ObjectId(session["user_id"])},
+        {"$set": {"password": hashed_new_password}}
+    )
+
+    return {"success": True, "message": "Password berhasil diubah"}, 200
+
+
 @app.errorhandler(403)
 def forbidden(error):
     return render_template('error-403.html'), 403
@@ -257,7 +309,7 @@ def register():
             flash('Email already exists. Please use a different email.', 'danger')
         else:
             hashed_password = generate_password_hash(password) 
-            database_users.insert_one({'username': username, 'email': email, 'password': hashed_password})
+            database_users.insert_one({'username': username, 'email': email, 'password': hashed_password, 'role': 'user'})
             flash('Registration successful. You can now log in.', 'success')
             return redirect(url_for('login')) 
 

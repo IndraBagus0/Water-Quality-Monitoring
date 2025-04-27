@@ -279,10 +279,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-6">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Profile Visit</h4>
+                                <h4>Grafik Suhu</h4>
                             </div>
                             <div class="card-body">
                                 <div id="chartSuhu"></div>
@@ -290,12 +290,10 @@
                         </div>
                     </div>
 
-                </div>
-                <div class="row">
-                    <div class="col-12">
+                    <div class="col-6">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Profile Visit</h4>
+                                <h4>Grafik pH</h4>
                             </div>
                             <div class="card-body">
                                 <div id="chartPh"></div>
@@ -304,120 +302,24 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12 col-xl-4">
+                    <div class="col-6">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Profile Visit</h4>
+                                <h4>Grafik TDS</h4>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col-7">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">Europe</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-5">
-                                        <h5 class="mb-0 text-end">862</h5>
-                                    </div>
-                                    <div class="col-12">
-                                        <div id="chart-europe"></div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-7">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-success" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">America</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-5">
-                                        <h5 class="mb-0 text-end">375</h5>
-                                    </div>
-                                    <div class="col-12">
-                                        <div id="chart-america"></div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-7">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-danger" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="{{ url_for('static', filename='assets/static/images/bootstrap-icons.svg') }}#circle-fill" />
-                                            </svg>
-
-                                            <h5 class="mb-0 ms-3">Indonesia</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-5">
-                                        <h5 class="mb-0 text-end">1025</h5>
-                                    </div>
-                                    <div class="col-12">
-                                        <div id="chart-indonesia"></div>
-                                    </div>
-                                </div>
+                                <div id="chartTds"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-xl-8">
+
+                    <div class="col-6">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Latest Comments</h4>
+                                <h4>Grafik Kekeruhan</h4>
                             </div>
                             <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-lg">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Comment</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="col-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar avatar-md">
-                                                            <!-- <img src="./assets/compiled/jpg/5.jpg"> -->
-                                                            <img src="{{ url_for('static', filename='./assets/compiled/jpg/5.jpg')}}"
-                                                                alt="">
-
-                                                        </div>
-                                                        <p class="font-bold ms-3 mb-0">Si Cantik</p>
-                                                    </div>
-                                                </td>
-                                                <td class="col-auto">
-                                                    <p class=" mb-0">Congratulations on your graduation!</p>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="col-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar avatar-md">
-                                                            <img src="{{ url_for('static', filename='./assets/compiled/jpg/2.jpg')}}"
-                                                                alt="">
-                                                        </div>
-                                                        <p class="font-bold ms-3 mb-0">Si Ganteng</p>
-                                                    </div>
-                                                </td>
-                                                <td class="col-auto">
-                                                    <p class=" mb-0">Wow amazing design! Can you make another
-                                                        tutorial for
-                                                        this design?</p>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <div id="chartTurbidity"></div>
                             </div>
                         </div>
                     </div>
@@ -430,10 +332,13 @@
                             <div class="avatar avatar-xl">
 
                                 {% if user.get('profile_pic') %}
-                                <div class="avatar avatar-xl me-3">
-                                    <img src="data:image/png;base64,{{ user['profile_pic'] | b64encode }}"
-                                        alt="Profile Picture">
+                                <div class="avatar avatar-xl me-3" style="cursor: pointer;">
+                                    <a href="{{ url_for('profile') }}">
+                                        <img src="data:image/png;base64,{{ user['profile_pic'] | b64encode }}"
+                                            alt="Profile Picture" style="width: 50px; height: 50px; object-fit: cover;">
+                                    </a>
                                 </div>
+
 
                                 {% else %}
                                 <div class="avatar avatar-xl me-3">
@@ -449,6 +354,14 @@
                         </div>
                     </div>
                 </div>
+                <!-- <div class="card">
+                    <div class="card-header">
+                        <h4>Visitors Profile</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-visitors-profile"></div>
+                    </div>
+                </div> -->
                 <div class="card">
                     <div class="card-header">
                         <h4>Daftar Pengguna</h4>
@@ -472,20 +385,13 @@
                         </div>
                         {% endfor %}
                         <div class="px-4">
-                            <button class='btn btn-block btn-xl btn-outline-primary font-bold mt-3'>Lebih
-                                Banyak</button>
+                            <a href="{{ url_for('users') }}" class="btn btn-block btn-xl btn-outline-primary font-bold mt-3">Lebih Banyak</a>
+
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Visitors Profile</h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="chart-visitors-profile"></div>
-                    </div>
-                </div>
+
             </div>
         </section>
     </div>
@@ -503,8 +409,7 @@
     </footer>
     <script>
         const chartData = JSON.parse('{{ chart_data_ph_temperatur  | safe }}');
-        console.log("chartData:", chartData);
-    
+        console.log(chartData);
         // Chart Suhu
         var suhuOptions = {
             series: [{
@@ -526,9 +431,8 @@
                 categories: chartData.timestamps
             },
             yaxis: {
-                // Otomatis menyesuaikan tinggi sumbu Y berdasarkan data
-                min: Math.min(...chartData.temperature) - 2,  // Sesuaikan dengan margin yang diinginkan
-                max: Math.max(...chartData.temperature) + 2,  // Sesuaikan dengan margin yang diinginkan
+                min: Math.min(...chartData.temperature) - 8,
+                max: Math.max(...chartData.temperature) + 1,
             },
             tooltip: {
                 x: {
@@ -536,10 +440,10 @@
                 },
             },
         };
-    
+
         var suhuChart = new ApexCharts(document.querySelector("#chartSuhu"), suhuOptions);
         suhuChart.render();
-    
+
         // Chart pH
         var phOptions = {
             series: [{
@@ -561,9 +465,9 @@
                 categories: chartData.timestamps
             },
             yaxis: {
-                // Otomatis menyesuaikan tinggi sumbu Y berdasarkan data
-                min: Math.min(...chartData.ph) - 4,  // Sesuaikan dengan margin yang diinginkan
-                max: Math.max(...chartData.ph) + 4,  // Sesuaikan dengan margin yang diinginkan
+
+                min: Math.min(...chartData.ph) - 4,
+                max: Math.max(...chartData.ph) + 4,
             },
             tooltip: {
                 x: {
@@ -571,11 +475,79 @@
                 },
             },
         };
-    
+
         var phChart = new ApexCharts(document.querySelector("#chartPh"), phOptions);
         phChart.render();
+
+        var tdsOptions = {
+            series: [{
+                name: 'TDS',
+                data: chartData.tds
+            }],
+            chart: {
+                height: 350,
+                type: 'area'
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            xaxis: {
+                type: 'datetime',
+                categories: chartData.timestamps
+            },
+            yaxis: {
+
+                min: Math.min(...chartData.tds) - 4,
+                max: Math.max(...chartData.tds) + 4,
+            },
+            tooltip: {
+                x: {
+                    format: 'dd/MM/yy HH:mm:ss'
+                },
+            },
+        };
+
+        var tdsChart = new ApexCharts(document.querySelector("#chartTds"), tdsOptions);
+        tdsChart.render();
+
+        var turbidityOptions = {
+            series: [{
+                name: 'Turbidity',
+                data: chartData.turbidity
+            }],
+            chart: {
+                height: 350,
+                type: 'area'
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            xaxis: {
+                type: 'datetime',
+                categories: chartData.timestamps
+            },
+            yaxis: {
+
+                min: Math.min(...chartData.turbidity) - 4,
+                max: Math.max(...chartData.turbidity) + 4,
+            },
+            tooltip: {
+                x: {
+                    format: 'dd/MM/yy HH:mm:ss'
+                },
+            },
+        };
+
+        var turbidityChart = new ApexCharts(document.querySelector("#chartTurbidity"), turbidityOptions);
+        turbidityChart.render();
     </script>
-    
+
 
     <script>
         console.log("Connecting to SSE stream...");
@@ -597,5 +569,5 @@
             console.error("Error connecting to SSE stream.");
         };
     </script>
-    
+
     {% endblock %}

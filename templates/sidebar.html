@@ -58,12 +58,15 @@
                         <span>Monitoring</span>
                     </a>
                 </li>
+                {% if session.get('role') != 'user' %}
                 <li class="sidebar-item {% if request.path == url_for('users') %}active{% endif %}">
                     <a href="{{ url_for('users') }}" class='sidebar-link'>
                         <i class="bi bi-person-lines-fill"></i>
                         <span>List Admin</span>
                     </a>
                 </li>
+                {% endif %}
+
                 <li class="sidebar-item {% if request.path == url_for('alat') %}active{% endif %}">
                     <a href="{{ url_for('alat') }}" class='sidebar-link'>
                         <i class="bi bi-gear-fill"></i>
@@ -93,32 +96,11 @@
         </div>
     </div>
 </div>
-<!-- Modal Tambah Perangkat -->
-<div class="modal fade" id="modalTambahPerangkat" tabindex="-1" aria-labelledby="modalTambahPerangkatLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTambahPerangkatLabel">Tambah Perangkat</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formTambahPerangkat">
-                    <div class="mb-3">
-                        <label for="device_id" class="form-label">Device ID</label>
-                        <input type="text" class="form-control" id="device_id" name="device_id" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="location" class="form-label">Lokasi</label>
-                        <input type="text" class="form-control" id="location" name="location" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Tambah Perangkat</button>
-                </form>
-            </div>
-        </div>
-    </div>
+v>
 </div>
 <script>
+    const role = "{{ role }}";
+    console.log(role);
     document.getElementById('logout').addEventListener('click', function (event) {
         event.preventDefault();
         Swal.fire({

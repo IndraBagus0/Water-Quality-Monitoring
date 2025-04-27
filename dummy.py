@@ -3,11 +3,11 @@ import json
 import time
 import random
 
-URL = "http://192.168.1.18:5000/data"
+URL = "http://167.71.234.92:5000/data"
 
 def generate_dummy_data():
     return {
-        "temperature": round(random.uniform(20, 35), 1),  # Suhu antara 20-35 °C
+        "temperature": round(random.uniform(25, 30), 1),  # Suhu antara 20-35 °C
         "ph": round(random.uniform(6, 8), 1),  # pH antara 6-8
         "tds": random.randint(100, 500),  # TDS antara 100-500 PPM
         "turbidity": round(random.uniform(10, 50), 1),  # Kekeruhan antara 10-50 NTU
@@ -17,7 +17,7 @@ def generate_dummy_data():
 def send_data():
     while True:
         headers = {"Content-Type": "application/json",
-                   "X-API-KEY": "ab40211da4129afecc53250748aa7907"}
+                   "X-API-KEY": "2b0dcad4bdecbbf0eff6214545203058"}
         data = generate_dummy_data()
         response = requests.post(URL, headers=headers, json=data)
         

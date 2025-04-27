@@ -19,14 +19,7 @@
                     <h3>Akun</h3>
                     <p class="text-subtitle text-muted">Profil Akun</p>
                 </div>
-                <div class="col-12 col-md-6 order-md-2 order-first">
-                    <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Form Layout</li>
-                        </ol>
-                    </nav>
-                </div>
+
             </div>
         </div>
 
@@ -253,6 +246,30 @@
 
                 if (!oldPassword) return;
 
+                // ✅ Tambah: Cek password lama valid atau tidak
+                try {
+                    const verifyResponse = await fetch("/api/verify-password", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ old_password: oldPassword }),
+                    });
+
+                    const verifyResult = await verifyResponse.json();
+                    console.log("Debug: Verify Password API", verifyResult);
+
+                    if (!verifyResult.success) {
+                        await Swal.fire("Gagal", verifyResult.message || "Password lama salah", "error");
+                        return; // Jangan lanjut ke input password baru
+                    }
+                } catch (error) {
+                    console.error("Debug: Error saat verifikasi password", error);
+                    await Swal.fire("Error", "Gagal menghubungi server", "error");
+                    return;
+                }
+
+                // ✅ Password lama valid ➡️ lanjut input password baru
                 const { value: newPassword } = await Swal.fire({
                     title: "Masukkan Kata Sandi Baru",
                     input: "password",
@@ -274,12 +291,34 @@
                     }
                 });
 
-                if (newPassword) {
-                    document.getElementById("old_password").value = oldPassword;
-                    document.getElementById("new_password").value = newPassword;
+                if (!newPassword) return;
 
-                    // Submit form secara otomatis setelah password diisi
-                    document.querySelector("form").submit();
+                // ✅ Submit ubah password
+                try {
+                    const response = await fetch("/api/change-password", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            old_password: oldPassword,
+                            new_password: newPassword
+                        }),
+                    });
+
+                    const result = await response.json();
+                    console.log("Debug: Response API", result);
+
+                    if (result.success) {
+                        Swal.fire("Sukses", "Password berhasil diubah", "success").then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire("Gagal", result.message || "Terjadi kesalahan", "error");
+                    }
+                } catch (error) {
+                    console.error("Debug: Error saat ubah password", error);
+                    Swal.fire("Error", "Gagal menghubungi server", "error");
                 }
             });
         }
