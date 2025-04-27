@@ -30,16 +30,16 @@
                                 src="{{ url_for('static', filename='assets/static/images/logo.png') }}" alt="Logo">
                         </a>
                     </div>
-                    <h1 class="auth-title">Log in.</h1>
-                    <p class="auth-subtitle mb-5">Log in with your data that you entered during registration.</p>
+                    <h1 class="auth-title">Log in</h1>
+                    <p class="auth-subtitle mb-5">Masuklah dengan data yang Anda masukkan saat registrasi.</p>
                     {% with messages = get_flashed_messages() %}
                     {% if messages %}
                     <script>
                         document.addEventListener("DOMContentLoaded", function () {
                             Swal.fire({
-                                title: "Warning",
+                                title: "{{ messages[1] }}",
                                 text: "{{ messages[0] }}",
-                                icon: "warning",
+                                icon: "{{ messages[2] }}",
                                 confirmButtonText: "OK"
                             });
                         });
@@ -57,7 +57,7 @@
                         </div>
                         <!-- Password -->
                         <div class="form-group position-relative has-icon-left mb-4">
-                            <input type="password" class="form-control form-control-xl" placeholder="Password"
+                            <input type="password" class="form-control form-control-xl" placeholder="Kata Sandi"
                                 name="password" required>
                             <div class="form-control-icon">
                                 <i class="bi bi-shield-lock"></i>
@@ -67,10 +67,8 @@
                     </form>
 
                     <div class="text-center mt-5 text-lg fs-4">
-                        <p class="text-gray-600">Don't have an account? <a href="{{ url_for('register') }}"
-                                class="font-bold">Sign
-                                up</a>.</p>
-                        <p><a class="font-bold" href="auth-forgot-password.html">Forgot password?</a>.</p>
+                        <p class="text-gray-600">Belum punya akun? <a href="{{ url_for('register') }}"
+                                class="font-bold">Daftar</a>.</p>
                     </div>
                 </div>
             </div>

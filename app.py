@@ -103,7 +103,6 @@ def ubah_api_key():
 @app.route('/list-users')
 def users():
     list_user = admin_data()
-    print(list_user)
     if 'role' not in session or session['role'] != 'admin':
 
         return redirect(request.referrer or url_for('dashboard'))
@@ -174,7 +173,6 @@ def receive_data():
             "timestamp": timestamp
         }
         database_sensor.insert_one(sensor_entry)
-        print("Data received:", sensor_entry)
         latest_data = sensor_entry  
 
         return jsonify({"status": "success", "message": "Data received"}), 200
@@ -184,7 +182,6 @@ def receive_data():
 
 @app.route('/stream')
 def stream():
-    print("Client connected to SSE")
     def event_stream():
         global latest_data
         while True:
@@ -206,11 +203,10 @@ def profile():
     if 'user_id' not in session:
         flash('Sesi login anda telah habis', 'warning')
         return redirect(url_for('login'))
-    
-    print(f"Debug: user_id dari session -> {session['user_id']}")
+
     
     user = database_users.find_one({"_id": ObjectId(session["user_id"])})
-    print(f"Debug: Data user dari database -> {user}")
+
 
     if request.method == 'POST':
 
