@@ -28,7 +28,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title">
-                        Data Kualitas Air
+                        Data Pengguna
                     </h5>
                 </div>
                 <div class="card-body">
@@ -43,6 +43,7 @@
                                     <th>email</th>
                                     <th>phone</th>
                                     <th>alamat</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="data-table-monitoring">
@@ -55,6 +56,14 @@
                                     <td>{{ users.email }}</td>
                                     <td>{{ users.phone }}</td>
                                     <td>{{ users.address }}</td>
+                                    <td>
+                                        
+                                        <!-- <a href="" class="btn btn-danger"><i class="bi bi-trash"></i></a> -->
+                                        {% if users.id != session['user_id'] %}
+                                        <a href="#" class="btn btn-warning btn-edit" data-id="{{ users.id }}" ><i class="bi bi-pencil"></i></a>
+                                        <a href="#" class="btn btn-danger btn-delete" data-id="{{ users.id }}"><i class="bi bi-trash"></i></a>
+                                    {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -80,4 +89,112 @@
         </div>
     </footer>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-id');
+            console.log('User ID:', userId);
+            Swal.fire({
+                title: 'Yakin ingin hapus user ini?',
+                text: "Tindakan ini tidak bisa dibatalkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/delete-user/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ user_id: userId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire('Berhasil!', data.message, 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal!', data.message, 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const actionButtons = document.querySelectorAll('.btn-edit');
+    
+    actionButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            const userId = this.getAttribute('data-id');
+            console.log('User ID:', userId);
+
+            // Menampilkan SweetAlert dengan tiga tombol
+            Swal.fire({
+                title: 'Pilih Tindakan untuk User ini',
+                text: 'Pilih tindakan yang ingin Anda lakukan.',
+                icon: 'question',
+                showCancelButton: true,
+                cancelButtonText: 'Batal',
+                confirmButtonText: 'Set as Admin',
+                reverseButtons: true,
+                showDenyButton: true,
+                denyButtonText: 'Reset Password',
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Set as Admin
+                    console.log('Set as Admin', userId);
+                    fetch('/api/set-admin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ user_id: userId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Berhasil!', data.message, 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal!', data.message, 'error');
+                        }
+                    });
+                } else if (result.isDenied) {
+                    // Reset Password
+                    console.log('Reset Password', userId);
+                    fetch('/api/reset-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ user_id: userId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Berhasil!', data.message, 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal!', data.message, 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+});
+
+</script>
+
+
 {% endblock %}

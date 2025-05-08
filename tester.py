@@ -73,7 +73,6 @@ def fuzzy_logic(input_pH, input_TDS, input_Kekeruhan):
     for rule in rules:
         weight = rule[0] * rule[1] * rule[2]  # Perhitungan bobot fuzzy
         numerator += weight * rule[3]
-        print(f"Bobot: {weight}, Nilai: {rule[3]}")
         denominator += weight
 
     return defuzzify_sugeno(numerator, denominator)
@@ -81,9 +80,9 @@ def fuzzy_logic(input_pH, input_TDS, input_Kekeruhan):
 
 # Contoh Input Sensor
 suhu = 25.62
-pH = 7.61
-TDS = 356.51
-turbidity = 52
+pH = 6.84
+TDS = 20.51
+turbidity = 1
 
 # Hitung fuzzy logic
 kelayakan_air = fuzzy_logic(pH, TDS, turbidity)

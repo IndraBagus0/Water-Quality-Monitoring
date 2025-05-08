@@ -108,6 +108,25 @@ def users():
         return redirect(request.referrer or url_for('dashboard'))
     return render_template('users.html', list_user=list_user)
 
+@app.route('/delete-user/', methods=['POST'])
+def delete_user():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID required'}), 400
+
+    result = database_users.delete_one({'_id': ObjectId(user_id)})
+    
+    if result.deleted_count > 0:
+        return jsonify({'status': 'success', 'message': 'User deleted'})
+    else:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
+
 @app.route('/filter-monitoring', methods=['GET'])
 def filter_monitoring():
     start_date = request.args.get("start")
@@ -278,6 +297,55 @@ def api_change_password():
     )
 
     return {"success": True, "message": "Password berhasil diubah"}, 200
+
+@app.route('/api/set-admin', methods=["POST"])
+def api_set_admin():
+    if 'user_id' not in session:
+        return {"success": False, "message": "Sesi habis"}, 401
+
+    data = request.get_json()
+    user_id = data.get("user_id")
+
+    user = database_users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        return {"success": False, "message": "User tidak ditemukan"}, 400
+
+    # Pastikan hanya admin yang bisa mengubah status user menjadi admin
+    if session.get('role') != 'admin':
+        return {"success": False, "message": "Unauthorized"}, 403
+
+    # Set user role to admin
+    database_users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"role": "admin"}}
+    )
+
+    return {"success": True, "message": "User berhasil di-set sebagai admin"}, 200
+
+@app.route('/api/reset-password', methods=["POST"])
+def api_reset_password():
+    if 'user_id' not in session:
+        return {"success": False, "message": "Sesi habis"}, 401
+
+    data = request.get_json()
+    user_id = data.get("user_id")
+
+    user = database_users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        return {"success": False, "message": "User tidak ditemukan"}, 400
+
+    # Pastikan hanya admin yang bisa mereset password user lain
+    if session.get('role') != 'admin':
+        return {"success": False, "message": "Unauthorized"}, 403
+
+    # Reset password to default '12345678'
+    hashed_password = generate_password_hash("12345678")
+    database_users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"password": hashed_password}}
+    )
+
+    return {"success": True, "message": "Password berhasil di-reset ke 12345678"}, 200
 
 
 @app.errorhandler(403)

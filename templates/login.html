@@ -32,20 +32,23 @@
                     </div>
                     <h1 class="auth-title">Log in</h1>
                     <p class="auth-subtitle mb-5">Masuklah dengan data yang Anda masukkan saat registrasi.</p>
-                    {% with messages = get_flashed_messages() %}
+                    {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                     <script>
                         document.addEventListener("DOMContentLoaded", function () {
+                            {% for category, message in messages %}
                             Swal.fire({
-                                title: "{{ messages[1] }}",
-                                text: "{{ messages[0] }}",
-                                icon: "{{ messages[2] }}",
+                                title: "{{ 'Peringatan' if category == 'warning' else 'Informasi' }}",
+                                text: "{{ message }}",
+                                icon: "{{ category }}",
                                 confirmButtonText: "OK"
                             });
+                            {% endfor %}
                         });
                     </script>
                     {% endif %}
                     {% endwith %}
+
                     <form method="post" action="{{ url_for('login') }}">
                         <!-- Email -->
                         <div class="form-group position-relative has-icon-left mb-4">

@@ -48,7 +48,7 @@ def get_data():
 
 def get_chart_data_ph_temperature():
     """Ambil data dari terbaru ke lama untuk chart."""
-    data = database_sensor.find().sort('timestamp', -1).limit(20)
+    data = database_sensor.find().sort('timestamp', -1).limit(200)
     data = list(data)
 
     chart_data_ph_temperatur = {
