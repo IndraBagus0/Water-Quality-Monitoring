@@ -3,7 +3,7 @@ import json
 import time
 import random
 
-URL = "http://167.71.234.92:5000/data"
+URL = "http://188.166.208.36:5000/data"
 
 def generate_dummy_data():
     return {
@@ -11,7 +11,7 @@ def generate_dummy_data():
         "ph": round(random.uniform(6, 8), 1),  # pH antara 6-8
         "tds": random.randint(100, 500),  # TDS antara 100-500 PPM
         "turbidity": round(random.uniform(10, 50), 1),  # Kekeruhan antara 10-50 NTU
-        "kelayakan": random.choice(["layak", "tidak layak"])  # Status acak
+        "kelayakan": round(random.uniform(50, 100), 1)
     }
 
 def send_data():

@@ -373,7 +373,7 @@
                                 {% if admin.profile_pic %}
                                 <img src="data:image/png;base64,{{ admin.profile_pic }}" alt="Profile Picture">
                                 {% else %}
-                                <img src="{{ url_for('static', filename='./assets/compiled/jpg/default.jpg') }}"
+                                <img src="{{ url_for('static', filename='./assets/compiled/jpg/2.jpg') }}"
                                     alt="Default Avatar">
                                 {% endif %}
                             </div>
@@ -385,7 +385,8 @@
                         </div>
                         {% endfor %}
                         <div class="px-4">
-                            <a href="{{ url_for('users') }}" class="btn btn-block btn-xl btn-outline-primary font-bold mt-3">Lebih Banyak</a>
+                            <a href="{{ url_for('users') }}"
+                                class="btn btn-block btn-xl btn-outline-primary font-bold mt-3">Lebih Banyak</a>
 
                         </div>
                     </div>
@@ -560,7 +561,9 @@
             document.getElementById('ph').innerText = data.ph;
             document.getElementById('tds').innerText = data.tds + " PPM";
             document.getElementById('turbidity').innerText = data.turbidity + " NTU";
-            document.getElementById('kelayakan').innerText = data.kelayakan;
+            document.getElementById('kelayakan').innerText =
+                parseFloat(data.kelayakan) > 80 ? 'Layak' : 'Tidak Layak';
+
             document.getElementById('locationdashboard').innerText = data.location;
 
         };

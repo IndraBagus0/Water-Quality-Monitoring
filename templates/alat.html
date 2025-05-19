@@ -34,26 +34,32 @@
                     </div>
                     <div class="card-content">
                         <div class="card-body" style="padding-top: 10px;">
-                            <div class="row">
-                                <div class="col-md-6 col-12">
-                                    <div class="form-group">
-                                        <label for="device_id">Nama</label>
-                                        <input type="text" id="device_id" class="form-control" name="device_id"
-                                            value="{{ alat.device_id }}">
+                            <!-- Gantilah form ID & input ID supaya unik -->
+                            <form id="update-alat-form-{{ loop.index }}">
+                                <div class="row">
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="device_id_{{ loop.index }}">Nama</label>
+                                            <input type="text" id="device_id_{{ loop.index }}" class="form-control"
+                                                name="device_id" value="{{ alat.device_id }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="location_{{ loop.index }}">Lokasi</label>
+                                            <input type="text" id="location_{{ loop.index }}" class="form-control"
+                                                name="location" value="{{ alat.location }}">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-12">
-                                    <div class="form-group">
-                                        <label for="location">Lokasi</label>
-                                        <input type="text" id="location" class="form-control" name="location"
-                                            value="{{ alat.location }}">
-                                    </div>
+                                <div class="col-12 d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary me-1 mb-1 mt-3"
+                                        data-index="{{ loop.index }}" data-device-id-lama="{{ alat.device_id }}">
+                                        Ubah Alat
+                                    </button>
                                 </div>
-                            </div>
-                            <div class="col-12 d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary me-1 mb-1 mt-3" id="change-alat-btn">Ubah
-                                    Alat</button>
-                            </div>
+                            </form>
+
                         </div>
 
                         <div class="card-header" style="padding-bottom: 5px; padding-top: 1px;">
@@ -173,31 +179,35 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const changeAlatBtn = document.getElementById('change-alat-btn');
-        const deviceIdLama = document.getElementById('device_id').value;  // Ambil nilai device_id
-        const locationLama = document.getElementById('location').value;  // Ambil nilai location
 
-        if (changeAlatBtn) {
-            changeAlatBtn.addEventListener('click', function (event) {
-                event.preventDefault();
+    document.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('button[type="submit"][data-device-id-lama]');
 
-                const deviceId = document.getElementById('device_id').value;
-                const location = document.getElementById('location').value;
+        buttons.forEach(button => {
+            const index = button.getAttribute('data-index');
+            const deviceIdLama = button.getAttribute('data-device-id-lama');
 
-                // Ambil data lama dari template atau backend (misalnya dari Flask context)
-                const oldDeviceId = (deviceIdLama);  // Data lama dari Flask context
-                const oldLocation = (locationLama);  // Data lama dari Flask context
+            const form = document.getElementById(`update-alat-form-${index}`);
+            const inputDeviceId = document.getElementById(`device_id_${index}`);
+            const inputLocation = document.getElementById(`location_${index}`);
 
-                // Validasi perubahan data  
-                if (deviceId === oldDeviceId && location === oldLocation) {
+            const deviceIdAwal = inputDeviceId.value;
+            const locationAwal = inputLocation.value;
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const deviceIdBaru = inputDeviceId.value;
+                const locationBaru = inputLocation.value;
+
+                if (deviceIdBaru === deviceIdAwal && locationBaru === locationAwal) {
                     Swal.fire({
                         title: "Tidak ada perubahan",
                         text: "Data yang dimasukkan sama dengan data sebelumnya.",
                         icon: "warning",
                         confirmButtonText: "OK"
                     });
-                    return;  // Tidak lanjutkan proses update
+                    return;
                 }
 
                 Swal.fire({
@@ -218,14 +228,13 @@
                                     'Content-Type': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    device_id: deviceId,
-                                    location: location
+                                    device_id_lama: deviceIdLama,
+                                    device_id: deviceIdBaru,
+                                    location: locationBaru
                                 })
                             });
 
                             const resJson = await response.json();
-                            console.log(resJson);
-
                             if (resJson.success) {
                                 Swal.fire('Sukses!', resJson.message, 'success').then(() => {
                                     location.reload();
@@ -240,11 +249,8 @@
                     }
                 });
             });
-        }
+        });
     });
-
-
-
 </script>
 
 {% endblock %}

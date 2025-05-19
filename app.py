@@ -23,7 +23,7 @@ jakarta_tz = pytz.timezone("Asia/Jakarta")
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -52,29 +52,30 @@ def alat():
     data_alat = alat_data()
     return render_template('alat.html', data_alat=data_alat, role=session.get('role'))
 
+
 @app.route('/api/update-alat', methods=['POST'])
 def update_alat():
-    if 'user_id' not in session:
-        return {"success": False, "message": "Sesi habis"}, 401
-    if 'role' not in session or session['role'] != 'admin':
-        return jsonify({'status': 'error', 'message': 'Akses ditolak'}), 403
     data = request.get_json()
-    device_id = data.get("device_id")
-    location = data.get("location")
+    device_id_lama = data.get('device_id_lama')
+    device_id_baru = data.get('device_id')
+    location_baru = data.get('location')
 
-    if not device_id or not location:
-        return {"success": False, "message": "Data tidak lengkap"}, 400
+    if not device_id_lama:
+        return jsonify({"success": False, "message": "device_id lama tidak tersedia"}), 400
 
-    # Update alat di database
-    result = database_alat.update_one(
-        {"device_id": device_id},
-        {"$set": {"location": location}}
+    alat = mongo.db.alat.find_one({"device_id": device_id_lama})
+    if not alat:
+        return jsonify({"success": False, "message": "Alat tidak ditemukan"}), 404
+
+    result = mongo.db.alat.update_one(
+        {"device_id": device_id_lama},
+        {"$set": {
+            "device_id": device_id_baru,
+            "location": location_baru
+        }}
     )
 
-    if result.matched_count == 0:
-        return {"success": False, "message": "Alat tidak ditemukan"}, 404
-
-    return {"success": True, "message": "Data alat berhasil diperbarui"}, 200
+    return jsonify({"success": True, "message": "Data alat berhasil diperbarui"})
 
 
 @app.route('/ubah-api-key', methods=['POST'])
@@ -127,27 +128,36 @@ def delete_user():
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
 
 
-@app.route('/filter-monitoring', methods=['GET'])
+@app.route('/filter-monitoring')
 def filter_monitoring():
-    start_date = request.args.get("start")
-    end_date = request.args.get("end")
+    start = request.args.get('start')
+    end = request.args.get('end')
 
-    if not start_date or not end_date:
-        return jsonify({"error": "Tanggal tidak valid"}), 400
+    if not start or not end:
+        return jsonify([])
 
     try:
-        start_dt = datetime.strptime(start_date + " 00:00:00", "%Y-%m-%d %H:%M:%S")
-        end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+        # Format waktu dari input HTML date (YYYY-MM-DD) jadi datetime object
+        start_date = datetime.strptime(start, "%Y-%m-%d")
+        end_date = datetime.strptime(end, "%Y-%m-%d")
 
-        filtered_data = database_sensor.find({
-            "timestamp": {"$gte": start_date, "$lte": end_date}
+        # Tambahkan 1 hari ke end_date agar filter <= end_date (inklusif)
+        end_date = end_date.replace(hour=23, minute=59, second=59)
+
+        # Ambil data dari MongoDB berdasarkan rentang waktu
+        data_cursor = database_sensor.find({
+            "timestamp": {
+                "$gte": start_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "$lte": end_date.strftime("%Y-%m-%d %H:%M:%S")
+            }
         }).sort('timestamp', -1)
 
-        result = []
-        for idx, record in enumerate(filtered_data, start=1):
-            result.append({
+        filtered_data = []
+        for idx, record in enumerate(data_cursor, start=1):
+            filtered_data.append({
                 "no": idx,
-                "timestamp": record['timestamp'], 
+                "timestamp": record['timestamp'],
+                "location": record['location'],
                 "ph": record['ph'],
                 "temperature": f"{record['temperature']} Derajat",
                 "tds": f"{record['tds']} PPM",
@@ -155,10 +165,11 @@ def filter_monitoring():
                 "kelayakan": record['kelayakan']
             })
 
-        return jsonify(result)
+        return jsonify(filtered_data)
 
-    except ValueError:
-        return jsonify({"error": "Format tanggal salah"}), 400
+    except Exception as e:
+        print(f"Error saat filter data: {e}")
+        return jsonify([])
 
 @app.route('/data', methods=['POST'])
 def receive_data():

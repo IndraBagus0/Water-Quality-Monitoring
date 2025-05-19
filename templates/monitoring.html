@@ -45,7 +45,9 @@
                                     <th>Suhu</th>
                                     <th>TDS</th>
                                     <th>Kekeruhan</th>
+                                    <th>Hasil Fuzzy</th>
                                     <th>Kualitas Air</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody id="data-table-monitoring">
@@ -59,6 +61,14 @@
                                     <td>{{ record.tds }}</td>
                                     <td>{{ record.turbidity }}</td>
                                     <td>{{ record.kelayakan }}</td>
+                                    <td>
+                                        {% if record.kelayakan|int > 80 %}
+                                        Layak
+                                        {% else %}
+                                        Tidak Layak
+                                        {% endif %}
+                                    </td>
+
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -166,11 +176,15 @@
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${item.timestamp}</td>
+                                    <td>${item.location}</td>
                                     <td>${item.ph}</td>
                                     <td>${item.temperature}</td>
                                     <td>${item.tds}</td>
                                     <td>${item.turbidity}</td>
                                     <td>${item.kelayakan}</td>
+                                    <td>
+                                        ${item.kelayakan > 80 ? "Layak" : "Tidak Layak"}
+                                    </td>
                                 </tr>
                             `;
                             });
