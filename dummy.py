@@ -3,7 +3,7 @@ import json
 import time
 import random
 
-URL = "http://188.166.208.36:5000/data"
+URL = "http://134.209.97.45:3000/data"
 
 def generate_dummy_data():
     return {

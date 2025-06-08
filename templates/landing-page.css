@@ -1,0 +1,182 @@
+/* Tambahkan ini di dalam tag <style> */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+:root {
+  --primery-color: #435ebe;
+  --text-color: #ffffff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins";
+  background-color: #ffffff;
+  max-width: 1027px;
+  margin: auto; /* Center the page horizontally */
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  box-sizing: border-box;
+}
+
+.left-nav h1 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--primery-color);
+  font-weight: bold;
+}
+
+.center-nav {
+  font-size: 16px;
+  color: var(--primery-color);
+  font-weight: 600;
+}
+
+.right-nav button {
+  background-color: var(--primery-color);
+  color: var(--text-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.right-nav button:hover {
+  background-color: var(--text-color);
+  color: var(--primery-color);
+  /* border: 1px solid var(--primery-color); */
+}
+
+.row {
+  margin-top: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
+.rowsensor{
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  justify-content: space-between;
+}
+.card-kualitas {
+  display: flex;
+  align-items: center;
+  /* background-color: #C7F2FF; */
+  border-radius: 0px 30px 0px 30px;
+  box-shadow: 0 2px 6px rgba(67, 94, 190, 0.15);
+  width: 450px;
+  height: 150px;
+}
+
+.sensor {
+  /* display: flex; */
+  align-items: center;
+  /* background-color: #C7F2FF; */
+  border-radius: 0px 30px 0px 30px;
+  box-shadow: 0 2px 6px rgba(67, 94, 190, 0.15);
+  width: 250px;
+  height: 150px;
+}
+
+.card-value {
+  display: flex;
+  align-items: center;
+  /* background-color: #C7F2FF; */
+  border-radius: 0px 30px 0px 30px;
+  /* box-shadow: 0 2px 6px rgba(67, 94, 190, 0.15); */
+  /* width: 250px; */
+  height: 150px;
+}
+.status-sensor {
+  /* background-color: #C7F2FF; */
+  border-radius: 0px 30px 0px 30px;
+  box-shadow: 0 2px 6px rgba(67, 94, 190, 0.15);
+  width: 250px;
+  height: 120px;
+}
+.status-title {
+  font-weight: 600;
+  font-size: 20px;
+  padding: 20px;
+  padding-bottom: 0px;
+}
+.status-sensor-inhumanread {
+  font-weight: 600;
+  font-size: 20px;
+  padding: 20px;
+  padding-top: 0px;
+}
+.logo {
+  width: 80px;
+  height: 70px;
+  background-color: #9694ff;
+  border-radius: 30px 0px 30px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+  flex-shrink: 0;
+}
+
+.logo-sensor {
+  width: 56px;
+  height: 56px;
+  background-color: #9694ff;
+  border-radius: 30px 0px 30px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+  flex-shrink: 0;
+}
+
+/* .logo svg {
+  width: 24px;
+  height: 24px;
+} */
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-title {
+  font-size: 30px;
+  font-weight: 600;
+  color: #6c757d;
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+.card-title-sensor{
+    font-size: 20px;
+  font-weight: 600;
+  color: #6c757d;
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+.card-status {
+  font-size: 24px;
+  margin-top: 0px;
+  font-weight: 800;
+  color: #435ebe;
+}
+
+.status-good {
+  color: #28a745; /* hijau untuk status "Layak" */
+}
+
+@media (max-width: 600px) {
+  .left-nav {
+    display: none;
+  }
+}
